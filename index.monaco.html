@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Monaco editor no loader</title>
+<link rel="stylesheet" data-name="vs/editor/editor.main" href="monaco/monaco/editor/editor.main.min.css">
+</head>
+<body>
+<div id="container" style="height:400px;border:1px solid black;"></div>
+<script>var require = { paths: { 'vs': 'monaco/monaco' } }</script>
+<script src="monaco/monaco/loader.min.js"></script>
+<script src="monaco/monaco/editor/editor.main.nls.js"></script>
+<script src="monaco/monaco/editor/editor.main.js"></script>
+<script src="scripts/utils.js"></script>
+<script type="text/javascript">
+  const initMonaco = async (props) => {
+    const { container, language } = props;
+    const validLanguages = ['javascript', 'typescript', 'python', 'markdown', 'sql', 'php', 'html', 'css'];
+    const validLanguage = language && validLanguages.includes(language) ? language : 'javascript';
+    const instance = monaco.editor.create(container, {
+      value: '',
+      language: validLanguage,
+      theme: 'vs-dark',
+    });
+    console.log('instance', instance);
+    return {
+      id: 'code',
+      editor: monaco.editor,
+      elements: {},
+      get: () => monaco.editor.getContent(),
+      set: (content) => monaco.editor.setContent(content)
+    }
+  }
+
+  window.onload = async () => {
+    const log = console.log;
+    const container = document.getElementById('container');
+    console.log('onload', container);
+    let editor = await initMonaco({ container });
+    await initEditor(editor);
+  }
+</script>
+</body>
+</html>

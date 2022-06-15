@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="tinymde/tiny-mde.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="tinymde/tiny-mde.min.css" />
+        <script src="scripts/utils.js"></script>
+    </head>
+    <body>
+        <div id="toolbar"></div>
+        <div id="editor"></div>
+        <script type="text/javascript">
+          const initMD = async () => {
+            const elements = {};
+            // ['toolbar', 'editor'].forEach(id => {
+            //   const el = document.createElement('div');
+            //   el.id = id;
+            //   document.body.insertBefore(el);
+            //   elements[id] = el;
+            // })
+
+            const tinyMDE = new TinyMDE.Editor({element: 'editor'});
+            const commandBar = new TinyMDE.CommandBar({element: 'toolbar', editor: tinyMDE});
+            return {
+              id: 'markdown',
+              editor: tinyMDE,
+              elements, 
+              get: () => tinyMDE.getContent(),
+              set: (content) => tinyMDE.setContent(content)
+            };
+          }
+
+
+
+          window.onload = async () => {
+              const log = console.log;
+              let editor = await initMD();
+              await initEditor(editor);
+              // const keys = ['KeyL', 'KeyS'];
+              // const save = async (content, withBackup) => {
+              //   return await fetch(`/save?payload=${btoa(unescape(encodeURIComponent(content)))}${withBackup ? '&backup=1' : ''}`);
+              // }
+              // const load = async () => {
+              //   const result = await fetch(`/load`);
+              //   return decodeURIComponent(escape(atob(await result.text())));
+              // }
+              // document.body.addEventListener('keydown', async (e) => {
+              //   const altCtrlKey = e.ctrlKey || e.altKey;
+              //   const shiftKey = e.shiftKey;
+              //   log(e)
+              //   if(!altCtrlKey || !keys.includes(e.code)) {
+              //     return;
+              //   }
+              //   e.preventDefault();
+              //   const command = e.code === 'KeyL' ? 'load' : 'save';
+              //   if(command === 'load') editor.set(await load());
+              //   if(command === 'save') await save(editor.get(), shiftKey);
+              //   return false;
+              // })
+          }
+        </script>
+    </body>
+</html>

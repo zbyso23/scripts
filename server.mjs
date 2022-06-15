@@ -14,14 +14,18 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 console.log('directory-name 👉️', __dirname);
 
-app.use(express.static('public'))
+app.use(express.static('public'));
 
 app.get('/', (req, res) => {
-  console.log('send file', path.join(__dirname, '/index.html'))
-  res.sendFile(path.join(__dirname, '/index.html'))
+  res.sendFile(path.join(__dirname, '/index.markdown.html'))
   // const content = fs.readFileSync('index.html');
   // res.set('Content-Type', 'text/html');
   // res.send(Buffer.from(content));
+})
+
+app.get('/code', (req, res) => {
+  console.log('send file', path.join(__dirname, '/index.monaco.html'))
+  res.sendFile(path.join(__dirname, '/index.monaco.html'))
 })
 
 app.get('/save', (req, res) => {
