@@ -1,0 +1,12 @@
+{
+  "name": "scripts",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.1",
+    "forever": "^4.0.3",
+    "path": "^0.12.7",
+    "url": "^0.11.0"
+  }
+}

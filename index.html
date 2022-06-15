@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="https://unpkg.com/tiny-markdown-editor@0.1.4/dist/tiny-mde.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="https://unpkg.com/tiny-markdown-editor@0.1.4/dist/tiny-mde.min.css" />
+        <style>
+            #status {
+                
+            }
+        </style>
+    </head>
+    <body>
+        <div id="toolbar"></div>
+        <div id="editor"></div>
+        <div id="status"></div>
+        <script type="text/javascript">            
+            window.onload = async () => {
+                const log = console.log;
+                const tinyMDE = new TinyMDE.Editor({element: 'editor'});
+                const commandBar = new TinyMDE.CommandBar({element: 'toolbar', editor: tinyMDE});
+                const status = document.querySelector('#status');
+                log('element', status)
+                const keys = ['KeyL', 'KeyS'];
+                const save = async (content, withBackup) => {
+                    return await fetch(`/save?payload=${btoa(unescape(encodeURIComponent(content)))}${withBackup ? '&backup=1' : ''}`);
+                }
+                const load = async () => {
+                    const result = await fetch(`/load`);
+                    return decodeURIComponent(escape(atob(await result.text())));
+                }
+                document.body.addEventListener('keydown', async (e) => {
+                    const altCtrlKey = e.ctrlKey || e.altKey;
+                    const shiftKey = e.shiftKey;
+                    log(e)
+                    if(!altCtrlKey || !keys.includes(e.code)) {
+                        return;
+                    }
+                    e.preventDefault();
+                    const command = e.code === 'KeyL' ? 'load' : 'save';
+                    // const result = await fetch(`/${command}${command === 'load' ? '' : '?payload=' + btoa(unescape(encodeURIComponent(tinyMDE.getContent())))}`);
+                    if(command === 'load') {
+                        tinyMDE.setContent(await load());
+
+                    }
+                    if(command === 'save') {
+                        await save(tinyMDE.getContent(), shiftKey);
+                    }
+                    return false;
+                })
+            }
+        </script>
+    </body>
+</html>
