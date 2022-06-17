@@ -1,27 +1,54 @@
 const keys = ['KeyL', 'KeyS'];
-export const save = async (content, withBackup) => {
-  return await fetch(`/save?payload=${btoa(unescape(encodeURIComponent(content)))}${withBackup ? '&backup=1' : ''}`);
+export const save = async (editor, withBackup) => {
+  console.log('save', editor)
+  return await fetch(`/save?payload=${btoa(unescape(encodeURIComponent(editor.get())))}${withBackup ? '&backup=1' : ''}${editor ? '&type=' + editor.id : ''}`);
 }
-export const load = async () => {
-  const result = await fetch(`/load`);
-  return decodeURIComponent(escape(atob(await result.text())));
+export const load = async (editor) => {
+  console.log('load', editor)
+  const result = await fetch(`/load?${editor ? 'type=' + editor.id : ''}`);
+  editor.set(decodeURIComponent(escape(atob(await result.text()))));
 }
 
 export const initEditor = async (editor) => {
   document.body.addEventListener('keydown', async (e) => {
     const altCtrlKey = e.ctrlKey || e.altKey;
     const shiftKey = e.shiftKey;
-    // console.log(e)
+    console.log(e, editor)
     if(!altCtrlKey || !keys.includes(e.code)) {
       return;
     }
     e.preventDefault();
     const command = e.code === 'KeyL' ? 'load' : 'save';
-    console.log(editor.get());
-    if(command === 'load') editor.set(await load());
-    if(command === 'save') await save(editor.get(), shiftKey);
+    if(command === 'load') await load(editor);
+    if(command === 'save') await save(editor, shiftKey);
     return false;
   })
+}
+
+export const createElements = (elements, outputNode) => {
+  const nodes = {};
+  const node = outputNode ? outputNode : document.body;
+  elements.forEach(item => {
+    const { element, id, style } = item;
+    const el = document.createElement(element);
+    if(id) el.id = id;
+    if(style) el.style = style;
+    node.appendChild(el);
+    nodes[id] = el;
+  });
+  return nodes;
+}
+
+export const initStatus = async () => {
+  const config = {
+    elements: {
+      element: 'div', id: 'menu', style: `
+      position: absolute; witdh: 200px; height: 200px; background-color: #FFF;
+      `
+    }
+  }
+  const nodes = createElements(config.elements);
+  return nodes;
 }
 
 export class Markdown
@@ -45,14 +72,7 @@ export class Markdown
   }
 
   mount = async () => {
-    this.#config.elements.forEach(props => {
-      const { element, id } = props;
-      const el = document.createElement(element);
-      el.id = id;
-      document.body.appendChild(el);
-      this.#elements[id] = el;
-    })
-    
+    this.#elements = createElements(this.#config.elements);
     this.#tinyMDE = new this.#TinyMDE.Editor({element: 'editor'});
     this.#commandBar = new this.#TinyMDE.CommandBar({element: 'toolbar', editor: this.#tinyMDE});
     return {
@@ -81,28 +101,22 @@ export class Code
     ]
   }
   #monaco;
+  #monacoEditor;
   #config = {};
   #elements = {};
 
   constructor(monaco, config)
   {
     this.#monaco = monaco;
+    this.#monacoEditor = monaco.editor;
     this.#config = config ? config : this.#defaultConfig;
   }
 
   mount = async (language) => {
-    this.#config.elements.forEach(item => {
-      const { element, id, style } = item;
-      const el = document.createElement(element);
-      if(id) el.id = id;
-      if(style) el.style = style;
-      document.body.appendChild(el);
-      this.#elements[id] = el;
-    });
-
+    this.#elements = createElements(this.#config.elements);
     const validLanguages = ['javascript', 'typescript', 'python', 'markdown', 'sql', 'php', 'html', 'css'];
     const validLanguage = language && validLanguages.includes(language) ? language : 'javascript';
-    const instance = this.#monaco.editor.create(this.#elements.container, {
+    const instance = this.#monacoEditor.create(this.#elements.container, {
       value: '',
       language: validLanguage,
       theme: 'vs-dark',
@@ -110,10 +124,10 @@ export class Code
     console.log('instance', instance);
     return {
       id: 'code',
-      editor: monaco.editor,
+      editor: this.#monacoEditor,
       elements: {},
-      get: () => this.#monaco.editor.getContent(),
-      set: (content) => this.#monaco.editor.setContent(content)
+      get: () => this.#monacoEditor.getModels()[0].getValue(),
+      set: (content) => this.#monacoEditor.getModels()[0].setValue(content)
     }
   }
 

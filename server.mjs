@@ -28,26 +28,41 @@ app.get('/code', (req, res) => {
   res.sendFile(path.join(__dirname, '/index.monaco.html'))
 })
 
+const allowedTypes = ['code', 'markdown'];
+const dataFile = `${dataPath}${file}.json`;
+
 app.get('/save', (req, res) => {
   const payload = req.query.payload;
   const backup = req.query.backup;
-  const outFile = `${dataPath}${file}.b64`;
+  const type = req.query.type;
+  if(!type || !allowedTypes.includes(type)) {
+    res.send(`error: invalid type`);
+    return;
+  }
+  const payloadOld = fs.existsSync(dataFile) ? JSON.parse(fs.readFileSync(dataFile)) : {};
+  const contentNewType = {};
+  contentNewType[type] = payload;
+  const content = { ...payloadOld, ...contentNewType };
   if(backup === '1') {
     const d = new Date();
     console.log('Backup', d.toISOString())
     const date = d.toISOString().replace(/:/g, '-').split('.')[0].split('T').join('_');
-    const backupFile = `${dataPath}${file}.${date}.b64`;
-    const payloadOld = fs.readFileSync(outFile);
-    fs.writeFileSync(backupFile, payloadOld);
+    const backupFile = `${dataPath}${file}.${date}.json`;
+    fs.writeFileSync(backupFile, JSON.stringify(payloadOld));
   }
-  fs.writeFileSync(outFile, payload);
-  res.send(`saved ${payload}`)
+  fs.writeFileSync(dataFile, JSON.stringify(content));
+  res.send(`saved`)
 })
   
 app.get('/load', (req, res) => {
-  const payloadFile = `${dataPath}${file}.b64`;
-  const payload = fs.readFileSync(payloadFile);
-  res.send(`${payload}`);
+  const type = req.query.type;
+  if(!type || !allowedTypes.includes(type)) {
+    res.send(`error: invalid type`);
+    return;
+  }
+  const payload = fs.existsSync(dataFile) ? JSON.parse(fs.readFileSync(dataFile)) : {};
+  const result = type in payload ? payload[type] : '';
+  res.send(`${payload[type]}`);
 })
 
 app.listen(port, () => {

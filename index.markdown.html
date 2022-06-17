@@ -10,7 +10,7 @@
       window.onload = async () => {
         const log = console.log;
         const markdown = new Markdown(TinyMDE);
-        const editor = markdown.mount();
+        const editor = await markdown.mount();
         await initEditor(editor);
       }
     </script>

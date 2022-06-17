@@ -12,16 +12,16 @@
     <script src="monaco/monaco/loader.min.js"></script>
     <script src="monaco/monaco/editor/editor.main.nls.js"></script>
     <script src="monaco/monaco/editor/editor.main.js"></script>
-    <script src="scripts/utils.js"></script>
     <script type="module">
-      import { load, save, initEditor, Code } from './scripts/utils.mjs';
+      import { load, save, initEditor, initStatus, Code } from './scripts/utils.mjs';
       
 
       window.onload = async () => {
         const log = console.log;
-        const markdown = new Code(monaco);
-        const editor = markdown.mount();
+        const code = new Code(monaco);
+        const editor = await code.mount();
         await initEditor(editor);
+        await initStatus();
       }
   </script>
   </body>
