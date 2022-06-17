@@ -5,6 +5,12 @@
     <title>Monaco editor no loader</title>
     <link rel="stylesheet" data-name="vs/editor/editor.main" href="monaco/monaco/editor/editor.main.min.css">
   </head>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+    }
+  </style>
   <body>
     <script>
       var require = { paths: { 'vs': 'monaco/monaco' } }
@@ -13,15 +19,19 @@
     <script src="monaco/monaco/editor/editor.main.nls.js"></script>
     <script src="monaco/monaco/editor/editor.main.js"></script>
     <script type="module">
-      import { load, save, initEditor, initStatus, Code } from './scripts/utils.mjs';
-      
-
+      import { initEditor } from './scripts/utils.mjs';
+      import { Code } from './scripts/code.mjs';
+      import { Status } from './scripts/status.mjs';
       window.onload = async () => {
         const log = console.log;
         const code = new Code(monaco);
-        const editor = await code.mount();
+        const hash = window.location.hash.substring(1);
+        const match = hash.match(/language=([a-zA-Z]+)/);
+        const language = (match) ? match[1] : 'javascript';
+        const editor = await code.mount(language);
         await initEditor(editor);
-        await initStatus();
+        const status = new Status();
+        await status.mount();
       }
   </script>
   </body>

@@ -4,14 +4,24 @@
     <script src="tinymde/tiny-mde.min.js"></script>
     <link rel="stylesheet" type="text/css" href="tinymde/tiny-mde.min.css" />
   </head>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+    }
+  </style>
   <body>
     <script type="module">
-      import { load, save, initEditor, Markdown } from './scripts/utils.mjs';
+      import { initEditor } from './scripts/utils.mjs';
+      import { Markdown } from './scripts/markdown.mjs';
+      import { Status } from './scripts/status.mjs';
       window.onload = async () => {
         const log = console.log;
         const markdown = new Markdown(TinyMDE);
         const editor = await markdown.mount();
         await initEditor(editor);
+        const status = new Status();
+        await status.mount();
       }
     </script>
   </body>

@@ -29,13 +29,18 @@ app.get('/code', (req, res) => {
 })
 
 const allowedTypes = ['code', 'markdown'];
+const isAllowed = (type) => {
+  if(allowedTypes.includes(type)) return true;
+  if(type.match(/code-[A-Za-z]+/)) return true;
+  return false;  
+}
 const dataFile = `${dataPath}${file}.json`;
 
 app.get('/save', (req, res) => {
   const payload = req.query.payload;
   const backup = req.query.backup;
   const type = req.query.type;
-  if(!type || !allowedTypes.includes(type)) {
+  if(!type || !isAllowed(type)) {
     res.send(`error: invalid type`);
     return;
   }
@@ -56,7 +61,7 @@ app.get('/save', (req, res) => {
   
 app.get('/load', (req, res) => {
   const type = req.query.type;
-  if(!type || !allowedTypes.includes(type)) {
+  if(!type || !isAllowed(type)) {
     res.send(`error: invalid type`);
     return;
   }
