@@ -69,6 +69,59 @@ export class Markdown
       document.body.removeChild(element);
     })
     this.#commandBar = undefined;
-    this.#commandBar = undefined;
+    this.#tinyMDE = undefined;
   }
 }
+
+export class Code
+{
+  #defaultConfig = {
+    elements: [
+      { element: 'div', id: 'container', style: 'height:400px;border:1px solid black;' },
+    ]
+  }
+  #monaco;
+  #config = {};
+  #elements = {};
+
+  constructor(monaco, config)
+  {
+    this.#monaco = monaco;
+    this.#config = config ? config : this.#defaultConfig;
+  }
+
+  mount = async (language) => {
+    this.#config.elements.forEach(item => {
+      const { element, id, style } = item;
+      const el = document.createElement(element);
+      if(id) el.id = id;
+      if(style) el.style = style;
+      document.body.appendChild(el);
+      this.#elements[id] = el;
+    });
+
+    const validLanguages = ['javascript', 'typescript', 'python', 'markdown', 'sql', 'php', 'html', 'css'];
+    const validLanguage = language && validLanguages.includes(language) ? language : 'javascript';
+    const instance = this.#monaco.editor.create(this.#elements.container, {
+      value: '',
+      language: validLanguage,
+      theme: 'vs-dark',
+    });
+    console.log('instance', instance);
+    return {
+      id: 'code',
+      editor: monaco.editor,
+      elements: {},
+      get: () => this.#monaco.editor.getContent(),
+      set: (content) => this.#monaco.editor.setContent(content)
+    }
+  }
+
+  unmount = async () => {
+    Object.values(this.#elements).forEach(element => {
+      document.body.removeChild(element);
+    })
+    
+  }
+}
+
