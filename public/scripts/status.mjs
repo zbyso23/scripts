@@ -42,6 +42,7 @@ export class Status {
           if(id === current) return;
           const urlCode = id === 'markdown' ? '' : id;
           window.location = [window.location.origin, urlCode].join('/');
+          
           // window.location.pathname = id === 'markdown' ? '/' : `/${id}`;
           // window.location.hash = '';
           // window.location.reload();

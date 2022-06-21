@@ -29,7 +29,7 @@
         const match = hash.match(/language=([a-zA-Z]+)/);
         const language = (match) ? match[1] : 'javascript';
         const editor = await code.mount(language);
-        await initEditor(editor);
+        await initEditor(editor, true);
         const status = new Status();
         await status.mount();
       }

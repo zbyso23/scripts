@@ -2,8 +2,8 @@ import { load, save } from './files.mjs';
 import { createElements } from './dom.mjs';
 import { keys } from './constants.mjs';
 
-export const initEditor = async (editor) => {
-  document.body.addEventListener('keydown', async (e) => {
+export const initEditor = async (editor, up) => {
+  const callback = async (e) => {
     const altCtrlKey = e.ctrlKey || e.altKey;
     const shiftKey = e.shiftKey;
     console.log(e, editor)
@@ -15,7 +15,21 @@ export const initEditor = async (editor) => {
     if(command === 'load') await load(editor);
     if(command === 'save') await save(editor, shiftKey);
     return false;
-  })
+  }
+  const event = (up) ? 'keyup' : 'keydown';
+  document.body.addEventListener(event, callback);
+  if(up) {
+    document.body.addEventListener('keydown', (e) => {
+      const altCtrlKey = e.ctrlKey || e.altKey;
+      const shiftKey = e.shiftKey;
+      console.log(e, editor)
+      if(!altCtrlKey || !keys.includes(e.code)) {
+        return;
+      }
+      e.preventDefault();
+      return false;
+    })
+  }
 }
 
 export const initStatus = async (language) => {
